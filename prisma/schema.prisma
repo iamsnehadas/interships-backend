@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique
+  password    String
+  role        String       // student, employer, admin
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  internships Internship[] @relation("UserInternships") // Many-to-many relation to internships
+  applications Application[] // Relation to applications
+}
+
+model Internship {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String
+  company     String
+  location    String
+  deadline    DateTime
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  applications Application[] // Relation to applications
+  users       User[]     @relation("UserInternships") // Many-to-many relation back to users
+}
+
+model Application {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  internshipId Int
+  status      String     // e.g., 'Applied', 'Under Review', 'Accepted', etc.
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id])
+  internship  Internship @relation(fields: [internshipId], references: [id])
+}
