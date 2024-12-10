@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,24 +10,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  private validRoles = ['student', 'employer', 'admin']; // Valid roles
-
   async register(data: { email: string; password: string; name: string; role: string }) {
-    // Validate role
-    if (!this.validRoles.includes(data.role)) {
-      throw new BadRequestException('Invalid role provided.');
-    }
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    // Create user in the database
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
-    });
+    try {
+      return this.prisma.user.create({
+        data: { ...data, password: hashedPassword },
+      });
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email already in use');
+      }
+      console.error('Error during registration:', error);
+      throw new Error('Registration failed');
+    }
   }
 
   async login(email: string, password: string) {

@@ -6,12 +6,13 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  register(@Body() data: { email: string; password: string; name: string; role: string }) {
+  async register(@Body() data: { email: string; password: string; name: string; role: string }) {
+    console.log('Register endpoint hit with data:', data);
     return this.authService.register(data);
   }
 
   @Post('login')
-  login(@Body() data: { email: string; password: string }) {
+  async login(@Body() data: { email: string; password: string }) {
     return this.authService.login(data.email, data.password);
   }
 }

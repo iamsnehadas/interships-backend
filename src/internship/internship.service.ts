@@ -5,43 +5,22 @@ import { PrismaService } from '../prisma/prisma.service';
 export class InternshipService {
   constructor(private prisma: PrismaService) {}
 
-  async createInternship(data: {
-    title: string;
-    description: string;
-    company: string;
-    location: string;
-    deadline: Date;
-  }) {
-    try {
-      return this.prisma.internship.create({
-        data,
-      });
-    } catch (error) {
-      throw new Error('Error creating internship');
-    }
+  async getAllInternships(search?: string) {
+    return this.prisma.internship.findMany({
+      where: search
+        ? { title: { contains: search, mode: 'insensitive' } }
+        : {},
+    });
   }
 
-  async getAllInternships() {
-    try {
-      return this.prisma.internship.findMany();
-    } catch (error) {
-      throw new Error('Error fetching internships');
-    }
+  async createInternship(data: { title: string; description: string; company: string; location: string; deadline: Date }) {
+    return this.prisma.internship.create({ data });
   }
 
-  async getInternshipById(id: number) {
-    try {
-      const internship = await this.prisma.internship.findUnique({
-        where: { id },
-      });
-
-      if (!internship) {
-        throw new Error('Internship not found');
-      }
-
-      return internship;
-    } catch (error) {
-      throw new Error('Error fetching internship');
-    }
+  async getApplications(internshipId: number) {
+    return this.prisma.application.findMany({
+      where: { internshipId },
+      include: { user: true },
+    });
   }
 }
