@@ -19,6 +19,7 @@ model User {
   applications Application[] // Relation to applications
 }
 
+
 model Internship {
   id          Int        @id @default(autoincrement())
   title       String

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,10 +10,23 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  private validRoles = ['student', 'employer', 'admin']; // Valid roles
+
   async register(data: { email: string; password: string; name: string; role: string }) {
+    // Validate role
+    if (!this.validRoles.includes(data.role)) {
+      throw new BadRequestException('Invalid role provided.');
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Create user in the database
     return this.prisma.user.create({
-      data: { ...data, password: hashedPassword },
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
     });
   }
 
