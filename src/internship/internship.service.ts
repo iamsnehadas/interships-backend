@@ -10,17 +10,22 @@ export class InternshipService {
       where: search
         ? { title: { contains: search, mode: 'insensitive' } }
         : {},
+      include: {
+        _count: {
+          select: { applications: true }, 
+        },
+      },
     });
   }
-
+  
   async createInternship(data: { title: string; description: string; company: string; location: string; deadline: Date }) {
     return this.prisma.internship.create({ data });
   }
-
+  
   async getApplications(internshipId: number) {
     return this.prisma.application.findMany({
       where: { internshipId },
       include: { user: true },
     });
-  }
+  }  
 }
