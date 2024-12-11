@@ -25,16 +25,33 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<{
+    accessToken: string;
+    user: { id: number; email: string; role: string };
+  }> {
+    // Fetch user from the database
     const user = await this.prisma.user.findUnique({ where: { email } });
+
+    // Check if user exists and password is valid
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.generateToken(user);
-  }
 
-  private generateToken(user: { id: number; email: string; role: string }) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    return { accessToken: this.jwtService.sign(payload) };
+    // Generate JWT
+    const accessToken = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    // Return the token and user details
+    return {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 }
