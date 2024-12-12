@@ -6,7 +6,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: 'https://vercel.com/snehas-projects-93637d62/interships-frontend/6df7Pc9njH9kc7H6dfCckQ31p7SC',
     credentials: true,
   });
 
